@@ -29,12 +29,12 @@ class RemoteServer(ProcessedSocket):
         super().__init__(loop=loop)
         self.remote_addr = remote_addr
 
-    async def listen(self, didListen):
+    async def listen(self):
         """
         @Description:
             listening on remote_addr
         @params:
-            didListen: callable function
+            None
         @returns:
             None
         """

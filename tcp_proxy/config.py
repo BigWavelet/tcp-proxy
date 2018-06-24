@@ -20,15 +20,15 @@ class InvalidPortError(Exception):
 
 
 
-remoteHost = "0.0.0.0"
-remotePort = 6789
+remote_host = "0.0.0.0"
+remote_port = 6789
 
 
-localHost = "0.0.0.0"
-localPort = 5678
+local_host = "0.0.0.0"
+local_port = 5678
 
-remoteAddress = Address(remoteHost, remotePort)
-localAddress = Address(localHost, localPort)
+remote_address = Address(remote_host, remote_port)
+local_address = Address(local_host, local_port)
 
 BUFFER_SIZE = 1024
 

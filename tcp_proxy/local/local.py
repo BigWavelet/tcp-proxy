@@ -34,12 +34,12 @@ class LocalServer(ProcessedSocket):
             self.loop, sef.local_addr, self.remote_addr
             )
 
-    async  def listen(self, didListen):
+    async  def listen(self):
         """
         @Description:
             listening on local address
         @params:
-            didListen: callback function
+            None
         @returns:
             None
         """

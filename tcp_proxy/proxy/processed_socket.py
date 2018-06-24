@@ -16,7 +16,7 @@ BUFFER_SIZE = config.BUFFER_SIZE
 logger = logging.getLogger(__name__)
 
 
-class ProcessedSocket(Object):
+class ProcessedSocket(object):
     """
     @Description:
         ProcessedSocket is a socket, 
