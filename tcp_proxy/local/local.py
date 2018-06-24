@@ -87,7 +87,7 @@ class LocalServer(ProcessedSocket):
 
         task = asyncio.ensure_future(
             asyncio.gather(local2remote,
-                remote2local.asyncio,
+                remote2local,
                 loop=self.loop,
                 return_exceptions=True)
             )

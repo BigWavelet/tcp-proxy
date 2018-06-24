@@ -7,11 +7,8 @@ __Author__ = "bigwavelet"
 
 from collections import namedtuple
 
-Config = namedtuple('Config',
-                    'remoteHost remotePort localHost localPort')
 
-
-Address = namedtuple('Host', 'Port')
+Address = namedtuple('Address', 'host port')
 
 
 class InvalidAddrError(Exception):
@@ -32,6 +29,8 @@ localPort = 5678
 
 remoteAddress = Address(remoteHost, remotePort)
 localAddress = Address(localHost, localPort)
+
+BUFFER_SIZE = 1024
 
 
 

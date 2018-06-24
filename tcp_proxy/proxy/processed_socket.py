@@ -7,10 +7,12 @@ import socket
 import logging
 import asyncio
 
+from tcp_proxy import config
+
 
 __Author__ = "bigwavelet"
 
-BUFFER_SIZE = 1024
+BUFFER_SIZE = config.BUFFER_SIZE
 logger = logging.getLogger(__name__)
 
 
@@ -61,7 +63,7 @@ class ProcessedSocket(Object):
 
         while True:
             # get raw data from src
-            data = await self.loop.sock_recv(src, BUFFER_SIZE)
+            data = await self.receive(src)
             if not data:
                 break
 
@@ -69,4 +71,31 @@ class ProcessedSocket(Object):
             processed_data = await self.process(data, process_type=0)
 
             # forward processed data to dst
-            await self.loop.sock_sendall(dst, data)
+            await self.send(dst, processed_data)
+
+    async def receive(self, conn):
+        """
+        @Description:
+            receive data from the socket connection
+        @params:
+            conn: socket connection
+        @returns:
+            recv_data: bytearray
+        """
+        data = await self.loop.sock_recv(conn, BUFFER_SIZE)
+        logger.debug('receive data from %s:%d, data: %r', *conn.getsockname(), data)
+        recv_data = bytearray(data)
+        return recv_data
+
+    async def send(self, conn, data):
+        """
+        @Description:
+            send data to the socket connection
+        @params:
+            conn: socket connection
+            data: bytearray data to be sended
+        @returns
+            None
+        """
+        await self.loop.sock_sendall(conn, data)
+        logger.debug("send data: %r to %s:%d", data, *conn.getsockname())
