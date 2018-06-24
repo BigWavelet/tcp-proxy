@@ -49,11 +49,11 @@ class LocalServer(ProcessedSocket):
             listener.listen(socket.SOMAXCONN)
             listener.setblocking(False)
 
-            logger.info("Listen on %s:%d" % *self.local_addr)
+            logger.info("Listen on %s:%d" % self.local_addr)
 
             while True:
                 local_conn, address = await self.loop.sock_accept(listener)
-                logger.info("Receive from %s:%d" % *address)
+                logger.info("Receive from %s:%d" % address)
                 asyncio.ensure_future(self.handle(local_conn))
 
     async def handle(self, local_conn):
@@ -110,8 +110,8 @@ class LocalServer(ProcessedSocket):
             conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             conn.setblocking(False)
             await self.loop.sock_connect(conn, self.remote_addr)
-        except Exception,e:
-            raise ConnectionError("failed to connect to the remote server: %s:%d; reason: %s" % (*self.remote_addr, e))
+        except Exception as err:
+            raise ConnectionError("failed to connect to the remote server: %s:%d; reason: %s" % (self.remote_addr, err))
 
         return conn
 

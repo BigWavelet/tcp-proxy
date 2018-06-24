@@ -44,11 +44,11 @@ class RemoteServer(ProcessedSocket):
             listener.bind(self.listenAddr)
             listener.listen(socket.SOMAXCONN)
 
-            logger.info("Listen on %s:%d" % *self.remote_addr)
+            logger.info("Listen on %s:%d" % self.remote_addr)
 
             while True:
                 remote_conn, address = await self.loop.sock_accept(listener)
-                logger.info("Receive from %s:%d", *address)
+                logger.info("Receive from %s:%d", address)
                 asyncio.ensure_future(self.handle(remote_conn))
 
 
@@ -118,7 +118,7 @@ class RemoteServer(ProcessedSocket):
             remote_conn.close()
             return
 
-        VER, CMD, RSV, ATYP DST_PORT = data[0], data[1], data[2], data[3], data[-2:]
+        VER, CMD, RSV, ATYP, DST_PORT = data[0], data[1], data[2], data[3], data[-2:]
 
         if VER != 0x5:
             remote_conn.close()
@@ -149,33 +149,33 @@ class RemoteServer(ProcessedSocket):
         else:
             connection.close()
             return
-        logger.debug("Real Address info: %s:%d; address family: %s", *real_addr, real_addr_family)
+        logger.debug("Real Address info: %s:%d; address family: %s", real_addr, real_addr_family)
 
         if real_addr_family:
             try:
                 real_conn = socket.socket(family=real_addr_family, type=socket.SOCK_STREAM)
                 real_conn.setblocking(False)
                 await self.loop.sock_connect(real_conn, real_addr)
-            exept Exception,e:
+            except Exception as err:
                 if real_conn is not None:
                     real_conn.close()
                     real_conn = None
-                    logger.error("fail to create real connection socket:%s:%d; Reason:%s", *real_addr, e)
+                    logger.error("fail to create real connection socket:%s:%d; Reason:%s", real_addr, err)
         else:
-            for item in await self.loop.getaddrinfo(*real_addr):
+            for item in await self.loop.getaddrinfo(real_addr.host, real_addr.port):
                 real_addr_family, socket_type, protocol, _, real_addr = item
                 try:
                     real_conn = socket.socket(real_addr_family, socket_type, protocol)
                     real_conn.setblocking(False)
                     await self.loop.sock_connect(real_conn, real_addr)
-                except Exception,e:
+                except Exception as err:
                     if real_conn is not None:
                         real_conn.close()
                         real_conn = None
-                        logger.error("fail to create real connection socket:%s:%d; Reason:%s", *real_addr, e)
+                        logger.error("fail to create real connection socket:%s:%d; Reason:%s", real_addr, err)
 
         if real_addr_family is None:
-            logger.error("fail to create real connection socket:%s:%d; Reason: real_addr_family is None", *real_addr)
+            logger.error("fail to create real connection socket:%s:%d; Reason: real_addr_family is None", real_addr)
             return
 
         ## then the remote server send data to the local server as follows:
