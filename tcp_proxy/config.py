@@ -20,8 +20,8 @@ class InvalidPortError(Exception):
 
 
 
-remote_host = "0.0.0.0"
-remote_port = 6789
+remote_host = "192.168.21.150"
+remote_port = 5679
 
 
 local_host = "0.0.0.0"

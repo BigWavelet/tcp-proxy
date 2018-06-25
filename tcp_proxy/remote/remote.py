@@ -41,14 +41,14 @@ class RemoteServer(ProcessedSocket):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as listener:
             listener.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             listener.setblocking(False)
-            listener.bind(self.listenAddr)
+            listener.bind(self.remote_addr)
             listener.listen(socket.SOMAXCONN)
 
             logger.info("Listen on %s:%d" % self.remote_addr)
 
             while True:
                 remote_conn, address = await self.loop.sock_accept(listener)
-                logger.info("Receive from %s:%d", address)
+                #logger.info("Receive from %s", address)
                 asyncio.ensure_future(self.handle(remote_conn))
 
 
@@ -76,6 +76,7 @@ class RemoteServer(ProcessedSocket):
         """
         if not data or not (data[0] == 0x05):
             remote_conn.close()
+            logger.debug("socks5 protocol error: the first byte is %s", data[0])
             return
 
         ## then send the (protocol version, method) to the local server
@@ -116,6 +117,7 @@ class RemoteServer(ProcessedSocket):
         data = await self.receive(remote_conn)
         if len(data) < 7:
             remote_conn.close()
+            logger.debug("socks5 protocol error, data length is :%d", len(data))
             return
 
         VER, CMD, RSV, ATYP, DST_PORT = data[0], data[1], data[2], data[3], data[-2:]
@@ -134,16 +136,16 @@ class RemoteServer(ProcessedSocket):
         if ATYP == 0x01:  # ipv4
             start = 4
             length = 4
-            real_host = socket.inet_ntop(socket.AF_INET, buf[start:start+length])
+            real_host = socket.inet_ntop(socket.AF_INET, data[start:start+length])
             real_addr = config.Address(host=real_host, port=real_port)
             real_addr_family = socket.AF_INET
-        elif buf[3] == 0x03: # ipv4, domain
-            real_host = buf[5:-2].decode()
+        elif data[3] == 0x03: # ipv4, domain
+            real_host = data[5:-2].decode()
             real_addr = config.Address(host=real_host, port=real_port)
-        elif buf[3] == 0x04: # ipv6
+        elif data[3] == 0x04: # ipv6
             start = 4
             length = 16
-            real_host = socket.inet_ntop(socket.AF_INET6, buf[start:start+length])
+            real_host = socket.inet_ntop(socket.AF_INET6, data[start:start+length])
             real_addr = (real_host, real_port, 0, 0)
             real_addr_family = socket.AF_INET6
         else:
@@ -205,7 +207,7 @@ class RemoteServer(ProcessedSocket):
         """
 
         data = bytearray((0x05, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00))
-        self.send(remote_conn, data)
+        await self.send(remote_conn, data)
 
 
         remote2real = asyncio.ensure_future(

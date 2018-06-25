@@ -67,9 +67,11 @@ class ProcessedSocket(object):
             if not data:
                 break
 
+            logger.debug("received raw data is: %s", data)
             # process data
             processed_data = await self.process(data, process_type=0)
 
+            logger.debug("processed data is: %s", processed_data)
             # forward processed data to dst
             await self.send(dst, processed_data)
 
@@ -83,7 +85,7 @@ class ProcessedSocket(object):
             recv_data: bytearray
         """
         data = await self.loop.sock_recv(conn, BUFFER_SIZE)
-        logger.debug('receive data from %s:%d, data: %r', *conn.getsockname(), data)
+        #logger.debug('receive data from %s:%d, data: %r', *conn.getsockname(), data)
         recv_data = bytearray(data)
         return recv_data
 
@@ -98,4 +100,4 @@ class ProcessedSocket(object):
             None
         """
         await self.loop.sock_sendall(conn, data)
-        logger.debug("send data: %r to %s:%d", data, *conn.getsockname())
+        #logger.debug("send data: %r to %s:%d", data, *conn.getsockname())
